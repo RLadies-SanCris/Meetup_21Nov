@@ -1,0 +1,209 @@
+---
+title: "¿Qué hay en mi data frame?"
+session: "R-Ladies San Cristóbal MX- Villahermosa"
+author: "Anahí Canedo Téxon"
+institute: "ECOSUR Unidad Villahermosa | Dept. Ecología Evolutiva y Conservación, Bioinformática"
+subtitle: 
+date: "21 de noviembre 2024"
+output:
+   xaringan::moon_reader:
+    css: 
+      - default
+      - css/mi-tema.css
+      - rladies
+      - rladies-fonts
+    #seal: false
+    self_contained: true   
+
+---
+## DATA FRAME
+* Es una lista de vectores de la misma longitud en una estructura
+rectangular, que R representa de forma similar a una tabla.
+* Estructuras de datos de dos dimensiones (rectangulares) que pueden contener datos de diferentes tipos (cualitativos/cuantitativos).
+* Debe contener el mismo número de elementos por cada objeto
+
+```{r}
+df <- data.frame(
+  "id" = 1:4, 
+  "profesion" = c("musico", "pintor", "enfermedo", "actor"), 
+  "edad" = c(20, 30, 18, 32),
+  "nombre" = as.character(c("Ana", "Pepe", "Maria", "Arturo"))
+)
+
+df
+
+```
+
+---
+# Funciones de Rbase para explorar data frame
+---
+
+Vamos a usar como ejemplo una base de datos pre-cargada en R base.  
+**"swiss"**: Datos sobre fecundidad e indicadores socioeconómicos en Suiza (1888)
+
+```{r}
+data() #Explorar las opciones de las bases de datos precargadas en R base
+data(swiss) #Seleccionar la base de datos 
+#-----------
+
+class(swiss) # clase de objeto
+str(swiss) # ¿qué informaciòn observas que te da como resultado?
+```
+---
+```{r}
+dim(swiss) #obtener las dimensiones del objetos 
+ncol(swiss) # numero de columnas
+nrow(swiss) # numero de renglones
+```
+
+---
+```{r}
+head(swiss)
+```
+
+---
+```{r}
+names(swiss) #conocer el nombre de las etiquetas de cada columna en un data frame
+colnames(swiss) # nombre de las columnas de un objeto
+row.names(swiss) # ¿qué información me da esta función? 
+```
+
+---
+# Extraer información del df.
+- Acceder a los elementos, o columnas del data frame
+```{r}
+# swiss$ # autocompleta con la tecla "tab"
+```
+
+Otra función útil para llamar las columnas:
+```{r}
+?attach() # Permite acceder a los objetos en la base de datos simplemente dando sus nombres.
+attach(swiss) 
+
+```
+
+---
+# Conocer cual es el valor mínimo y máximo de una variable:
+```{r}
+min(swiss$Education)
+max(swiss$Education)
+```
+---
+- ¿Y si quiero extraer el valor de una celda? 
+```{r}
+swiss$Education # Observa que al inicio de la linea , el número del renglón está definido por: []
+```
+--- 
+- Ya sabemos que el nivel máximo de educación es 53 ¿En qué posición se encuentra el valor máximo para la variable educación?: 
+```{r}
+swiss$Education
+```
+- Extraer la celda 45
+```{r}
+swiss$Education[45]
+```
+---
+- Contar celda por celda no es nada práctico, entonces: 
+```{r}
+# ?which.max()
+```
+
+```{r}
+which.max(swiss$Education) # me da la posición donde se encuentra el valor máximo de mi df.
+```
+---
+# Anidar funciones para extraer información:
+- Hacer un subset del df:
+```{r}
+maxEducacion <- swiss[which.max(swiss$Education), ]
+```
+- Obtener el país donde se ha registrado el nivel más alto de educación:
+```{r}
+maxEducation.pais <-row.names(swiss[which.max(swiss$Education), ] )
+
+```
+---
+- Otras funciones para hacer subsets:
+```{r}
+# ?subset()
+```
+
+```{r}
+subset(swiss, swiss$Education== min(swiss$Education))
+```
+
+```{r}
+subset(swiss, swiss$Education== "1")
+```
+
+```{r}
+rownames(swiss)[swiss$Education == "1"]
+```
+---
+# Es tu turno:
+- Obtén un subset del País con la mayor tasa de mortalidad infantil
+- ¿Cuál es el valor de la tasa de mortalidad máxima?
+- ¿Cuál es el país?
+---
+# Graficar nuestros datos desde Rbase
+- Función *barplot* para graficar los datos:
+```{r}
+?barplot()
+```
+---
+- Grafiquemos un triste barplot:
+```{r}
+barplot(swiss$Catholic)
+```
+---
+- Editar gráficos con Rbase:
+```{r}
+barplot(swiss$Catholic, names.arg = row.names(swiss), nrow(swiss), las=2, col = "lightgreen", xlab = "Países en Suiza", ylab = "Frecuencia", axisnames = T, cex.names =  0.5, cex.axis = 0.5,  col.lab = "thistle" , col.axis = "sky blue" ,main = "Religión Católica",font= 4, col.main= "darkblue", axes = F, border = F, space =0.001)
+
+```
+---
+# Quedó padre ¿no?  
+- Ahora es tu turno:
+- Consulta del "help" de la función *barplot()* para editar tu gráfico
+- Tiempo: 10 min
+---
+# GGPLOTS
+- A muchos les gustan los gráficos estéticos de ggplot, aunque esto es para otro taller podemos ver un ejemplo:
+```{r}
+# instalar el paquete
+# install.packages("ggplot2")
+# Recuerda activar el paquete:
+library(ggplot2)
+```
+---
+```{r}
+ggplot(swiss, aes(x =Catholic )) +
+  geom_histogram(binwidth = 5, fill = "lightblue", color = "white") +
+  labs(title = "Religión Catóica",
+       x = "Católicos",
+       y = "Frecuencia") +
+  theme_minimal()
+```
+---
+- Exportar gráficos con alta calidad de imagen: 
+```{r}
+# ?png()
+# ?svg()
+# ?jpeg()
+
+# png(width=10,height=10, res= 1200, file = "PlotEducacion.png")
+# barplot(swiss$Education)
+# dev.off()
+```
+
+---
+- Las funciones de la familia Tidyverse, son muy útiles para manipular bases de datos, de manera fácil y ordenada. ¿Quién se anima a darnos un taller de las Tidyverse?
+![](tidyverse.png)
+---
+# Si quieres aprender más:
+ 
+[R para Principiantes](https://cran.r-project.org/doc/contrib/rdebuts_es.pdf).
+
+[R for Data Science](https://r4ds.had.co.nz/)
+
+[Learning R Language](https://riptutorial.com/Download/r-language.pdf)
